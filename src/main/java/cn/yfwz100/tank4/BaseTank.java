@@ -81,8 +81,14 @@ public interface BaseTank extends Actor, Killable {
     float gunAngleVelocity = (float) (20 * Math.PI / 180);
     float velocity = 20;
     float bulletVelocity = 100;
-    float shotInterval = 1000;
     //</editor-fold>
+
+    /**
+     * Get the interval between two shots.
+     *
+     * @return the interval.
+     */
+    float getShotInterval();
 
     @Override
     default boolean update() {
@@ -119,7 +125,7 @@ public interface BaseTank extends Actor, Killable {
         }
 
         if (isShooting()) {
-            if (System.currentTimeMillis() - getLastShotTime() > shotInterval) {
+            if (System.currentTimeMillis() - getLastShotTime() > getShotInterval()) {
                 Vec2 vel = new Vec2(
                         (float) (-Math.sin(getGunBody().getAngle())),
                         (float) (Math.cos(getGunBody().getAngle()))

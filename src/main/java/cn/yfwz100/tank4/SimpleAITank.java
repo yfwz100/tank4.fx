@@ -27,6 +27,11 @@ public interface SimpleAITank extends BaseTank {
     MoveState getNextDirection();
 
     @Override
+    default float getShotInterval() {
+        return 1000;
+    }
+
+    @Override
     default boolean update() {
         BaseTank tank = getStory().getPlayer();
         if (tank == null) return false;
