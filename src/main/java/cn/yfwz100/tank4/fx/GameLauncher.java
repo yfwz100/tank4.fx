@@ -1,5 +1,10 @@
-package cn.yfwz100.board;
+package cn.yfwz100.tank4.fx;
 
+import cn.yfwz100.story.fx.GameLoop;
+import cn.yfwz100.tank4.BaseTank;
+import cn.yfwz100.tank4.PlayerTank;
+import cn.yfwz100.tank4.Tank4Story;
+import cn.yfwz100.tank4.fx.battle.BasicTankBattleStory;
 import de.codecentric.centerdevice.MenuToolkit;
 import javafx.animation.FadeTransition;
 import javafx.animation.Timeline;
@@ -75,8 +80,9 @@ public class GameLauncher extends Application {
         Scene mainScene = new Scene(mainPane);
         theStage.setScene(mainScene);
 
-        //<editor-fold defaultState="collapsed" desc="Init event handlers">
+        //<editor-fold defaultState="collapsed" desc="Init event handlers.">
         EventHandler<ActionEvent> startActionHandler = e -> Platform.runLater(() -> {
+            gameLoop.setStory(new BasicTankBattleStory());
             mainPane.setCenter(gameCanvas);
 
             FadeTransition fadeTransition = new FadeTransition(Duration.millis(1000), aboutPane);
@@ -97,6 +103,10 @@ public class GameLauncher extends Application {
             fadeTransition.setAutoReverse(false);
             fadeTransition.play();
         });
+        EventHandler<ActionEvent> stopActionHandler = e -> Platform.runLater(() -> {
+            mainPane.setCenter(scorePane);
+            gameLoop.stop();
+        });
         //</editor-fold>
 
         //<editor-fold defaultState="collapsed" desc="Construct the welcomePane.">
@@ -107,7 +117,7 @@ public class GameLauncher extends Application {
             welcomePane.setOrientation(Orientation.VERTICAL);
             welcomePane.setVgap(20);
 
-            ImageView bannerImage = new ImageView("cn/yfwz100/board/TankIIBanner.png");
+            ImageView bannerImage = new ImageView("cn/yfwz100/tank4/fx/TankIIBanner.png");
 
             Label versionLabel = new Label("Version: 2.0 (by yfwz100)");
             versionLabel.setTextAlignment(TextAlignment.CENTER);
@@ -139,8 +149,76 @@ public class GameLauncher extends Application {
             g.restore();
         }
         gameLoop = new GameLoop(gameCanvas);
-//        mainScene.setOnKeyPressed(e -> gameLoop.keyMapProperty().put(e.getCode(), true));
-//        mainScene.setOnKeyReleased(e -> gameLoop.keyMapProperty().put(e.getCode(), false));
+        gameLoop.setOnExit(stopActionHandler);
+        mainScene.setOnKeyPressed(e -> {
+            if (gameLoop.isRunning() && gameLoop.getStory() instanceof Tank4Story) {
+                PlayerTank hero = ((Tank4Story) gameLoop.getStory()).getPlayer();
+                switch (e.getCode()) {
+                    case A:
+                    case LEFT:
+                        hero.setMoveState(BaseTank.MoveState.LEFT);
+                        break;
+                    case D:
+                    case RIGHT:
+                        hero.setMoveState(BaseTank.MoveState.RIGHT);
+                        break;
+                    case W:
+                    case UP:
+                        hero.setMoveState(BaseTank.MoveState.UP);
+                        break;
+                    case S:
+                    case DOWN:
+                        hero.setMoveState(BaseTank.MoveState.DOWN);
+                        break;
+                    case K:
+                        hero.setGunState(BaseTank.GunState.CLOCKWISE);
+                        break;
+                    case J:
+                        hero.setGunState(BaseTank.GunState.ANTICLOCKWISE);
+                        break;
+                }
+            }
+        });
+        mainScene.setOnKeyReleased(e -> {
+            if (gameLoop.isRunning() && gameLoop.getStory() instanceof Tank4Story) {
+                PlayerTank hero = ((Tank4Story) gameLoop.getStory()).getPlayer();
+                switch (e.getCode()) {
+                    case A:
+                    case LEFT:
+                        if (hero.getMoveState() == BaseTank.MoveState.LEFT) {
+                            hero.setMoveState(BaseTank.MoveState.STOP);
+                        }
+                        break;
+                    case D:
+                    case RIGHT:
+                        if (hero.getMoveState() == BaseTank.MoveState.RIGHT) {
+                            hero.setMoveState(BaseTank.MoveState.STOP);
+                        }
+                        break;
+                    case W:
+                    case UP:
+                        if (hero.getMoveState() == BaseTank.MoveState.UP) {
+                            hero.setMoveState(BaseTank.MoveState.STOP);
+                        }
+                        break;
+                    case S:
+                    case DOWN:
+                        if (hero.getMoveState() == BaseTank.MoveState.DOWN) {
+                            hero.setMoveState(BaseTank.MoveState.STOP);
+                        }
+                        break;
+                    case J:
+                    case K:
+                        hero.setGunState(BaseTank.GunState.STOP);
+                        break;
+                    case SPACE:
+                        hero.setShooting(true);
+                        break;
+                    default:
+                        hero.setMoveState(BaseTank.MoveState.STOP);
+                }
+            }
+        });
         gameCanvas.setCache(true);
         //</editor-fold>
 
@@ -152,7 +230,7 @@ public class GameLauncher extends Application {
             scorePane.setColumnHalignment(HPos.CENTER);
             scorePane.setVgap(20);
 
-            ImageView logoView = new ImageView("cn/yfwz100/board/TankIIBanner.png");
+            ImageView logoView = new ImageView("cn/yfwz100/tank4/fx/TankIIBanner.png");
 
             GridPane detailBox = new GridPane();
             {
@@ -191,7 +269,7 @@ public class GameLauncher extends Application {
         //<editor-fold defaultState="" desc="Construct the aboutPane.">
         aboutPane = new FlowPane();
         {
-            ImageView bannerImage = new ImageView("cn/yfwz100/board/TankIIBanner.png");
+            ImageView bannerImage = new ImageView("cn/yfwz100/tank4/fx/TankIIBanner.png");
 
             Label descLabel = new Label("Press any key to continue.");
             {
@@ -222,10 +300,7 @@ public class GameLauncher extends Application {
             MenuItem stopMenuItem = new MenuItem("Stop");
             stopMenuItem.disableProperty().bind(gameLoop.activeProperty().not());
             stopMenuItem.setAccelerator(KeyCombination.valueOf("meta+e"));
-            stopMenuItem.setOnAction(e -> Platform.runLater(() -> {
-                mainPane.setCenter(scorePane);
-                gameLoop.stop();
-            }));
+            stopMenuItem.setOnAction(stopActionHandler);
             gameMenu.getItems().add(stopMenuItem);
         }
 
