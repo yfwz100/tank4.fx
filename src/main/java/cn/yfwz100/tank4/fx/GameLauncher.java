@@ -83,14 +83,14 @@ public class GameLauncher extends Application {
         //<editor-fold defaultState="collapsed" desc="Init event handlers.">
         EventHandler<ActionEvent> startActionHandler = e -> Platform.runLater(() -> {
             gameLoop.setStory(new BasicTankBattleStory());
+            gameLoop.start();
             mainPane.setCenter(gameCanvas);
 
-            FadeTransition fadeTransition = new FadeTransition(Duration.millis(1000), aboutPane);
+            FadeTransition fadeTransition = new FadeTransition(Duration.millis(1000), gameCanvas);
             fadeTransition.setFromValue(0);
             fadeTransition.setToValue(1.0);
             fadeTransition.setCycleCount(1);
             fadeTransition.setAutoReverse(false);
-            fadeTransition.setOnFinished(fe -> gameLoop.start());
             fadeTransition.play();
         });
         EventHandler<ActionEvent> aboutActionHandler = e -> Platform.runLater(() -> {
@@ -104,8 +104,15 @@ public class GameLauncher extends Application {
             fadeTransition.play();
         });
         EventHandler<ActionEvent> stopActionHandler = e -> Platform.runLater(() -> {
-            mainPane.setCenter(scorePane);
             gameLoop.stop();
+
+            FadeTransition fadeTransition = new FadeTransition(Duration.millis(1000), gameCanvas);
+            fadeTransition.setFromValue(1.0);
+            fadeTransition.setToValue(0.0);
+            fadeTransition.setCycleCount(1);
+            fadeTransition.setAutoReverse(false);
+            fadeTransition.setOnFinished(e2 -> mainPane.setCenter(scorePane));
+            fadeTransition.play();
         });
         //</editor-fold>
 
@@ -271,8 +278,11 @@ public class GameLauncher extends Application {
         {
             ImageView bannerImage = new ImageView("cn/yfwz100/tank4/fx/TankIIBanner.png");
 
-            Label descLabel = new Label("Press any key to continue.");
+            Label descLabel = new Label("Brought to you by yfwz100.\nAs a gift to SanDuck at Christmas. ");
             {
+                descLabel.setFont(Font.font("Chalkduster"));
+                descLabel.setTextAlignment(TextAlignment.CENTER);
+
                 FadeTransition fadeTransition = new FadeTransition(Duration.millis(1000), descLabel);
                 fadeTransition.setFromValue(0.5);
                 fadeTransition.setToValue(1.0);
@@ -281,10 +291,25 @@ public class GameLauncher extends Application {
                 fadeTransition.play();
             }
 
+            Button backButton = new Button("← Back");
+            {
+                backButton.setOnAction(e -> Platform.runLater(() -> {
+                    mainPane.setCenter(welcomePane);
+                    {
+                        FadeTransition fadeTransition = new FadeTransition(Duration.seconds(1), welcomePane);
+                        fadeTransition.setFromValue(0);
+                        fadeTransition.setToValue(1.0);
+                        fadeTransition.play();
+                    }
+                }));
+                backButton.setPrefWidth(bannerImage.getImage().getWidth() * 0.5);
+            }
+
             aboutPane.setOrientation(Orientation.VERTICAL);
             aboutPane.setColumnHalignment(HPos.CENTER);
             aboutPane.setAlignment(Pos.CENTER);
-            aboutPane.getChildren().addAll(bannerImage, descLabel);
+            aboutPane.setVgap(20);
+            aboutPane.getChildren().addAll(bannerImage, descLabel, backButton);
         }
         //</editor-fold>
 
