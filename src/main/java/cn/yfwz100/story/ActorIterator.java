@@ -28,7 +28,21 @@ public class ActorIterator implements Iterator<Actor> {
     @SafeVarargs
     public ActorIterator(Iterator<? extends Actor> ... actorIterators) {
         this.actorIterators = new ArrayDeque<>(actorIterators.length);
+        appendIterators(actorIterators);
+    }
+
+    @SafeVarargs
+    public final ActorIterator appendIterators(Iterator<? extends Actor> ... actorIterators) {
         Collections.addAll(this.actorIterators, actorIterators);
+        return this;
+    }
+
+    @SafeVarargs
+    public final ActorIterator prependIterators(Iterator<? extends Actor> ... actorIterators) {
+        for (Iterator<? extends Actor> actorIterator: actorIterators) {
+            this.actorIterators.offer(actorIterator);
+        }
+        return this;
     }
 
     @Override
