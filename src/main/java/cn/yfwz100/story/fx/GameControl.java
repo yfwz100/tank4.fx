@@ -1,4 +1,4 @@
-package cn.yfwz100.board;
+package cn.yfwz100.story.fx;
 
 import javafx.beans.property.BooleanProperty;
 
