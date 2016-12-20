@@ -1,11 +1,15 @@
 package cn.yfwz100.tank4.fx.battle;
 
+import cn.yfwz100.story.ActorIterator;
 import cn.yfwz100.story.Story;
 import cn.yfwz100.tank4.*;
 import cn.yfwz100.tank4.fx.actor.StyledPlayerTank;
+import cn.yfwz100.tank4.fx.effect.SimpleExplodeEffect;
+import cn.yfwz100.tank4.fx.effect.VisualEffect;
 import org.jbox2d.callbacks.ContactImpulse;
 import org.jbox2d.callbacks.ContactListener;
 import org.jbox2d.collision.Manifold;
+import org.jbox2d.collision.WorldManifold;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.World;
@@ -48,6 +52,11 @@ public abstract class TankBattleStory implements Tank4Story {
     private final Collection<Block> blocks;
 
     /**
+     * the visual effects.
+     */
+    private final Collection<VisualEffect> visualEffects;
+
+    /**
      * The next story.
      */
     private Story nextStory = this;
@@ -84,6 +93,9 @@ public abstract class TankBattleStory implements Tank4Story {
                     if (b.getUserData() instanceof Killable) {
                         ((Killable) b.getUserData()).kill(bullet.getPower());
                     }
+                    WorldManifold manifold = new WorldManifold();
+                    contact.getWorldManifold(manifold);
+                    getVisualEffects().add(new SimpleExplodeEffect(manifold.points[0]));
                 }
                 if (b.getUserData() instanceof Bullet) {
                     Bullet bullet = (Bullet) b.getUserData();
@@ -91,6 +103,9 @@ public abstract class TankBattleStory implements Tank4Story {
                     if (a.getUserData() instanceof Killable) {
                         ((Killable) a.getUserData()).kill(bullet.getPower());
                     }
+                    WorldManifold manifold = new WorldManifold();
+                    contact.getWorldManifold(manifold);
+                    getVisualEffects().add(new SimpleExplodeEffect(manifold.points[0]));
                 }
             }
 
@@ -107,6 +122,8 @@ public abstract class TankBattleStory implements Tank4Story {
         tanks = new ConcurrentLinkedDeque<>();
 
         blocks = new ConcurrentLinkedDeque<>();
+
+        visualEffects = new ConcurrentLinkedDeque<>();
     }
 
     @Override
@@ -136,9 +153,18 @@ public abstract class TankBattleStory implements Tank4Story {
         return blocks;
     }
 
+    private Collection<VisualEffect> getVisualEffects() {
+        return visualEffects;
+    }
+
     @Override
     public World getWorld() {
         return world;
+    }
+
+    @Override
+    public ActorIterator actorIterator() {
+        return Tank4Story.super.actorIterator().appendIterators(visualEffects.iterator());
     }
 
     @Override
