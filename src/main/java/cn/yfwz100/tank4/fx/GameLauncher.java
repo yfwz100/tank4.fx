@@ -1,10 +1,12 @@
 package cn.yfwz100.tank4.fx;
 
+import cn.yfwz100.story.Story;
 import cn.yfwz100.story.fx.GameLoop;
 import cn.yfwz100.tank4.BaseTank;
 import cn.yfwz100.tank4.PlayerTank;
 import cn.yfwz100.tank4.Tank4Story;
 import cn.yfwz100.tank4.fx.battle.BasicTankBattleStory;
+import cn.yfwz100.tank4.fx.battle.ScriptBasedTankBattle;
 import de.codecentric.centerdevice.MenuToolkit;
 import javafx.animation.FadeTransition;
 import javafx.animation.Timeline;
@@ -28,6 +30,9 @@ import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+
+import javax.script.ScriptException;
+import java.io.File;
 
 /**
  * The window of the board game.
@@ -65,6 +70,11 @@ public class GameLauncher extends Application {
      */
     private GameLoop gameLoop;
 
+    /**
+     * The level choice box.
+     */
+    private ChoiceBox<LevelInfo> levelChoiceBox;
+
     @Override
     public void start(Stage theStage) {
         theStage.setTitle("Block Tank Game");
@@ -82,7 +92,7 @@ public class GameLauncher extends Application {
 
         //<editor-fold defaultState="collapsed" desc="Init event handlers.">
         EventHandler<ActionEvent> startActionHandler = e -> Platform.runLater(() -> {
-            gameLoop.setStory(new BasicTankBattleStory());
+            gameLoop.setStory(levelChoiceBox.getValue().getStory());
             gameLoop.start();
             mainPane.setCenter(gameCanvas);
 
@@ -134,13 +144,25 @@ public class GameLauncher extends Application {
             startBtn.setOnAction(startActionHandler);
             startBtn.setPrefWidth(bannerImage.getImage().getWidth() * 0.5);
 
+            levelChoiceBox = new ChoiceBox<>();
+            {
+                levelChoiceBox.setPrefWidth(bannerImage.getImage().getWidth() * 0.5);
+                LevelInfo defaultLevel;
+                levelChoiceBox.getItems().addAll(
+                        defaultLevel = new LevelInfo("Basic", "basic.js"),
+                        new LevelInfo("Medium", "medium.js"),
+                        new LevelInfo("Hard", "hard.js")
+                );
+                levelChoiceBox.setValue(defaultLevel);
+            }
+
             Button aboutBtn = new Button("About");
             aboutBtn.setOnAction(aboutActionHandler);
             aboutBtn.setPrefWidth(bannerImage.getImage().getWidth() * 0.5);
 
             buttonBar.setAlignment(Pos.CENTER);
             buttonBar.setSpacing(5);
-            buttonBar.getChildren().addAll(startBtn, aboutBtn);
+            buttonBar.getChildren().addAll(startBtn, levelChoiceBox, aboutBtn);
 
             welcomePane.getChildren().addAll(bannerImage, versionLabel, buttonBar);
         }
@@ -385,6 +407,35 @@ public class GameLauncher extends Application {
         Label label = new Label(text);
         label.setFont(Font.font("HanziPen SC", Font.getDefault().getSize() + 2));
         return label;
+    }
+
+    private class LevelInfo {
+
+        private String name;
+        private String fileName;
+
+        LevelInfo(String name) {
+            this(name, name);
+        }
+
+        LevelInfo(String name, String fileName) {
+            this.name = name;
+            this.fileName = fileName;
+        }
+
+        public Story getStory() {
+            try {
+                return new ScriptBasedTankBattle(fileName);
+            } catch (ScriptException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
     }
 
 }
