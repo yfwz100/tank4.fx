@@ -23,7 +23,7 @@ public abstract class Bullet implements Actor {
     /**
      * The story of the actor.
      */
-    private Tank4Story story;
+    private BaseTank owner;
 
     /**
      * The flag indicating the life state.
@@ -33,19 +33,19 @@ public abstract class Bullet implements Actor {
     /**
      * Construct a bullet object in the story.
      *
-     * @param story the story.
-     * @param pos the position.
-     * @param vel the VELOCITY.
+     * @param owner the owner.
+     * @param pos   the position.
+     * @param vel   the VELOCITY.
      */
-    protected Bullet(Tank4Story story, Vec2 pos, Vec2 vel) {
-        this.story = story;
+    protected Bullet(BaseTank owner, Vec2 pos, Vec2 vel) {
+        this.owner = owner;
 
         BodyDef bodyDef = new BodyDef();
         bodyDef.position = pos;
         bodyDef.fixedRotation = true;
         bodyDef.type = BodyType.DYNAMIC;
         bodyDef.userData = this;
-        body = story.getWorld().createBody(bodyDef);
+        body = getStory().getWorld().createBody(bodyDef);
 
         CircleShape circle = new CircleShape();
         circle.m_radius = 0.5f;
@@ -64,9 +64,18 @@ public abstract class Bullet implements Actor {
         return alive;
     }
 
+    /**
+     * The owner of the bullet.
+     *
+     * @return the owner.
+     */
+    public BaseTank getOwner() {
+        return owner;
+    }
+
     @Override
     public Tank4Story getStory() {
-        return story;
+        return owner.getStory();
     }
 
     @Override
@@ -103,6 +112,6 @@ public abstract class Bullet implements Actor {
 
     @Override
     public void cleanup() {
-        story.getWorld().destroyBody(body);
+        getStory().getWorld().destroyBody(body);
     }
 }

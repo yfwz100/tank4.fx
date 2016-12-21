@@ -218,6 +218,6 @@ public abstract class PhysicalBaseTank implements BaseTank {
 
     @Override
     public Bullet createBullet(Vec2 pos, Vec2 vel) {
-        return new StyledBullet(getStory(), pos, vel);
+        return new StyledBullet(this, pos, vel);
     }
 }

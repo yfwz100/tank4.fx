@@ -50,4 +50,10 @@ public interface Story {
      */
     ActorIterator actorIterator();
 
+    /**
+     * Get the score board of the story.
+     *
+     * @return the score board.
+     */
+    ScoreBoard getScoreBoard();
 }

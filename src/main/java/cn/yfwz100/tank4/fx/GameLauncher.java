@@ -5,6 +5,7 @@ import cn.yfwz100.story.fx.GameLoop;
 import cn.yfwz100.tank4.BaseTank;
 import cn.yfwz100.tank4.PlayerTank;
 import cn.yfwz100.tank4.Tank4Story;
+import cn.yfwz100.tank4.TankScoreBoard;
 import cn.yfwz100.tank4.fx.battle.BasicTankBattleStory;
 import cn.yfwz100.tank4.fx.battle.ScriptBasedTankBattle;
 import de.codecentric.centerdevice.MenuToolkit;
@@ -12,6 +13,8 @@ import javafx.animation.FadeTransition;
 import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.property.*;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
@@ -75,6 +78,16 @@ public class GameLauncher extends Application {
      */
     private ChoiceBox<LevelInfo> levelChoiceBox;
 
+    /**
+     * Current story.
+     */
+    private Tank4Story story;
+
+    /**
+     * The score model connecting GUI and story.
+     */
+    private final ScoreModel scoreModel = new ScoreModel();
+
     @Override
     public void start(Stage theStage) {
         theStage.setTitle("Block Tank Game");
@@ -92,7 +105,7 @@ public class GameLauncher extends Application {
 
         //<editor-fold defaultState="collapsed" desc="Init event handlers.">
         EventHandler<ActionEvent> startActionHandler = e -> Platform.runLater(() -> {
-            gameLoop.setStory(levelChoiceBox.getValue().getStory());
+            gameLoop.setStory(story = levelChoiceBox.getValue().getStory());
             gameLoop.start();
             mainPane.setCenter(gameCanvas);
 
@@ -115,6 +128,15 @@ public class GameLauncher extends Application {
         });
         EventHandler<ActionEvent> stopActionHandler = e -> Platform.runLater(() -> {
             gameLoop.stop();
+
+            //<editor-fold defaultState="collapsed" desc="Sync story and score board...">
+            if (story != null) {
+                TankScoreBoard scoreBoard = story.getScoreBoard();
+                scoreModel.score.set(String.valueOf(scoreBoard.getScore()));
+                scoreModel.maxKillTimes.set(String.valueOf(scoreBoard.getMaxKillTimes()));
+                scoreModel.description.set(scoreBoard.getDescription());
+            }
+            //</editor-fold>
 
             FadeTransition fadeTransition = new FadeTransition(Duration.millis(1000), gameCanvas);
             fadeTransition.setFromValue(1.0);
@@ -263,9 +285,9 @@ public class GameLauncher extends Application {
 
             GridPane detailBox = new GridPane();
             {
-                detailBox.addRow(0, new Label("Achievement: "), styledLabel("Ordinary Hero!"));
-                detailBox.addRow(1, new Label("Score: "), styledLabel("1000"));
-                detailBox.addRow(2, new Label("Killed: "), styledLabel("10"));
+                detailBox.addRow(0, new Label("Achievement: "), styledLabel(scoreModel.description));
+                detailBox.addRow(1, new Label("Score: "), styledLabel(scoreModel.score));
+                detailBox.addRow(2, new Label("Killed: "), styledLabel(scoreModel.maxKillTimes));
 
                 ColumnConstraints headerConstraints = new ColumnConstraints();
                 headerConstraints.setHalignment(HPos.RIGHT);
@@ -403,12 +425,36 @@ public class GameLauncher extends Application {
         theStage.show();
     }
 
-    private static Label styledLabel(String text) {
-        Label label = new Label(text);
+    private static Label styledLabel(StringProperty text) {
+        Label label = new Label();
+        label.textProperty().bind(text);
         label.setFont(Font.font("HanziPen SC", Font.getDefault().getSize() + 2));
         return label;
     }
 
+    /**
+     * The score model connecting GUI and story.
+     */
+    private class ScoreModel {
+        /**
+         * The score.
+         */
+        private final StringProperty score = new SimpleStringProperty();
+
+        /**
+         * The max killing times.
+         */
+        private final StringProperty maxKillTimes = new SimpleStringProperty();
+
+        /**
+         * The description.
+         */
+        private final StringProperty description = new SimpleStringProperty();
+    }
+
+    /**
+     * The level info class.
+     */
     private class LevelInfo {
 
         private String name;
@@ -423,7 +469,7 @@ public class GameLauncher extends Application {
             this.fileName = fileName;
         }
 
-        public Story getStory() {
+        public Tank4Story getStory() {
             try {
                 return new ScriptBasedTankBattle(fileName);
             } catch (ScriptException e) {

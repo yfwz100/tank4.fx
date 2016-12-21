@@ -51,6 +51,9 @@ public interface Tank4Story extends Story {
         );
     }
 
+    @Override
+    TankScoreBoard getScoreBoard();
+
     /**
      * Call on end event.
      */

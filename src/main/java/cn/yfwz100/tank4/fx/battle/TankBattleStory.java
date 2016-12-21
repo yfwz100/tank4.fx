@@ -2,6 +2,7 @@ package cn.yfwz100.tank4.fx.battle;
 
 import cn.yfwz100.story.ActorIterator;
 import cn.yfwz100.story.Story;
+import cn.yfwz100.story.ScoreBoard;
 import cn.yfwz100.tank4.*;
 import cn.yfwz100.tank4.fx.actor.StyledPlayerTank;
 import cn.yfwz100.tank4.fx.effect.SimpleExplodeEffect;
@@ -57,6 +58,11 @@ public abstract class TankBattleStory implements Tank4Story {
     private final Collection<VisualEffect> visualEffects;
 
     /**
+     * The score board.
+     */
+    private final TankScoreBoardImpl scoreBoard;
+
+    /**
      * The next story.
      */
     private Story nextStory = this;
@@ -85,6 +91,10 @@ public abstract class TankBattleStory implements Tank4Story {
                     bullet.kill();
                     if (b.getUserData() instanceof Killable) {
                         ((Killable) b.getUserData()).kill(bullet.getPower());
+
+                        if (b.getUserData() instanceof AITank && bullet.getOwner() instanceof PlayerTank) {
+                            scoreBoard.trackPlayerKill((AITank) b.getUserData());
+                        }
                     }
                     WorldManifold manifold = new WorldManifold();
                     contact.getWorldManifold(manifold);
@@ -95,6 +105,10 @@ public abstract class TankBattleStory implements Tank4Story {
                     bullet.kill();
                     if (a.getUserData() instanceof Killable) {
                         ((Killable) a.getUserData()).kill(bullet.getPower());
+
+                        if (a.getUserData() instanceof AITank && bullet.getOwner() instanceof PlayerTank) {
+                            scoreBoard.trackPlayerKill((AITank) a.getUserData());
+                        }
                     }
                     WorldManifold manifold = new WorldManifold();
                     contact.getWorldManifold(manifold);
@@ -117,6 +131,8 @@ public abstract class TankBattleStory implements Tank4Story {
         blocks = new ConcurrentLinkedDeque<>();
 
         visualEffects = new ConcurrentLinkedDeque<>();
+
+        scoreBoard = new TankScoreBoardImpl();
     }
 
     @Override
@@ -153,6 +169,11 @@ public abstract class TankBattleStory implements Tank4Story {
     @Override
     public World getWorld() {
         return world;
+    }
+
+    @Override
+    public TankScoreBoard getScoreBoard() {
+        return scoreBoard;
     }
 
     @Override

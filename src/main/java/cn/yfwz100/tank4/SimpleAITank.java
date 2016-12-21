@@ -9,7 +9,7 @@ import java.util.Optional;
  *
  * @author yfwz100
  */
-public interface SimpleAITank extends BaseTank {
+public interface SimpleAITank extends AITank {
 
     /**
      * The time of last movement.
@@ -71,7 +71,7 @@ public interface SimpleAITank extends BaseTank {
             }
         }
 
-        return BaseTank.super.update();
+        return AITank.super.update();
     }
 }
 
