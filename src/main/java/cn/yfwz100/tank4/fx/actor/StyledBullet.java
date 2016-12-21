@@ -20,7 +20,7 @@ public class StyledBullet extends Bullet implements ActorGraphics {
      *
      * @param story the story.
      * @param pos   the position.
-     * @param vel   the velocity.
+     * @param vel   the VELOCITY.
      */
     StyledBullet(Tank4Story story, Vec2 pos, Vec2 vel) {
         super(story, pos, vel);
@@ -29,11 +29,10 @@ public class StyledBullet extends Bullet implements ActorGraphics {
     @Override
     public void paint(GraphicsContext g) {
         g.save();
-        g.scale(0.5, 0.5);
 
         g.translate(getBody().getPosition().x, getBody().getPosition().y);
         g.setFill(Color.RED);
-        g.fillOval(-5, -5, 10, 10);
+        g.fillOval(-0.5, -0.5, 1, 1);
 
         g.restore();
     }

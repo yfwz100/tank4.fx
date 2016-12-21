@@ -76,13 +76,6 @@ public abstract class TankBattleStory implements Tank4Story {
             public void endContact(Contact contact) {
             }
 
-            private void kill(Bullet bullet, Killable obj) {
-                bullet.kill();
-//                    WorldManifold manifold = new WorldManifold();
-//                    contact.getWorldManifold(manifold);
-//                    addVisualEffect(new SimpleExploreEffect(manifold.points[0]));
-            }
-
             @Override
             public void preSolve(Contact contact, Manifold oldManifold) {
                 Body a = contact.getFixtureA().getBody();

@@ -56,7 +56,6 @@ public class SimpleExplodeEffect implements VisualEffect {
     @Override
     public void paint(GraphicsContext g) {
         g.save();
-        g.scale(0.5, 0.5);
         g.setFill(new Color(0.8, 1, 0, time / 200.0));
         g.fillOval(x - rad, y - rad, 2 * rad, 2 * rad);
         g.restore();
@@ -64,7 +63,7 @@ public class SimpleExplodeEffect implements VisualEffect {
 
     @Override
     public boolean update() {
-        rad += 0.5f;
+        rad += 0.05f;
         time -= 1f;
 
         return time > 0;

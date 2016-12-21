@@ -19,6 +19,20 @@ public interface BaseTank extends Actor, Killable {
     Body getTankBody();
 
     /**
+     * The width of the tank.
+     *
+     * @return the width of the tank.
+     */
+    float getTankWidth();
+
+    /**
+     * The height of the tank.
+     *
+     * @return the height of the tank.
+     */
+    float getTankHeight();
+
+    /**
      * The body of the gun.
      *
      * @return the gun body.
@@ -78,9 +92,9 @@ public interface BaseTank extends Actor, Killable {
     void setLastShotTime(long shotTime);
 
     //<editor-fold defaultState="collapsed" desc="Declare the properties.">
-    float gunAngleVelocity = (float) (20 * Math.PI / 180);
-    float velocity = 20;
-    float bulletVelocity = 100;
+    float GUN_ANGLE_VELOCITY = (float) (20 * Math.PI / 180);
+    float VELOCITY = 5;
+    float BULLET_VELOCITY = 10;
     //</editor-fold>
 
     /**
@@ -92,38 +106,27 @@ public interface BaseTank extends Actor, Killable {
 
     @Override
     default boolean update() {
-        Vec2 destPos;
-        switch (this.getMoveState()) {
-            case LEFT:
-                destPos = new Vec2(-velocity, 0);
-                break;
-            case RIGHT:
-                destPos = new Vec2(velocity, 0);
-                break;
-            case UP:
-                destPos = new Vec2(0, -velocity);
-                break;
-            case DOWN:
-                destPos = new Vec2(0, velocity);
-                break;
-            default:
-                destPos = new Vec2();
-        }
+        //<editor-fold defaultState="collapsed" desc="Update the movement of tank.">
+        Vec2 destPos = this.getMoveState().getDirectionVector();
         Vec2 cv = getTankBody().getLinearVelocity();
         Vec2 dv = destPos.sub(cv).mulLocal(getTankBody().getMass());
         getTankBody().applyLinearImpulse(dv, getTankBody().getWorldCenter());
+        //</editor-fold>
 
+        //<editor-fold defaultState="collapsed" desc="Update behaviors of the gun.">
         switch (getGunState()) {
             case CLOCKWISE:
-                getGunBody().setAngularVelocity(gunAngleVelocity);
+                getGunBody().setAngularVelocity(GUN_ANGLE_VELOCITY);
                 break;
             case ANTICLOCKWISE:
-                getGunBody().setAngularVelocity(-gunAngleVelocity);
+                getGunBody().setAngularVelocity(-GUN_ANGLE_VELOCITY);
                 break;
             default:
                 getGunBody().setAngularVelocity(0);
         }
+        //</editor-fold>
 
+        //<editor-fold defaultState="collapsed" desc="Update the shooting behaviors.">
         if (isShooting()) {
             if (System.currentTimeMillis() - getLastShotTime() > getShotInterval()) {
                 Vec2 vel = new Vec2(
@@ -131,12 +134,13 @@ public interface BaseTank extends Actor, Killable {
                         (float) (Math.cos(getGunBody().getAngle()))
                 );
                 getStory().getBullets().add(
-                        createBullet(getTankBody().getPosition().add(vel.mul(50f)), vel.mul(bulletVelocity))
+                        createBullet(getTankBody().getPosition().add(vel.mul(5f)), vel.mul(BULLET_VELOCITY))
                 );
                 setShooting(false);
                 setLastShotTime(System.currentTimeMillis());
             }
         }
+        //</editor-fold>
 
         return isAlive();
     }
@@ -148,7 +152,7 @@ public interface BaseTank extends Actor, Killable {
      * Create the bullet.
      *
      * @param pos the position of the bullet.
-     * @param vel the velocity of the bullet.
+     * @param vel the VELOCITY of the bullet.
      * @return the bullet.
      */
     Bullet createBullet(Vec2 pos, Vec2 vel);
@@ -157,11 +161,31 @@ public interface BaseTank extends Actor, Killable {
      * The state of the tank.
      */
     enum MoveState {
-        LEFT,
-        RIGHT,
-        UP,
-        DOWN,
-        STOP
+        LEFT(new Vec2(-VELOCITY, 0)),
+        RIGHT(new Vec2(VELOCITY, 0)),
+        UP(new Vec2(0, -VELOCITY)),
+        DOWN(new Vec2(0, VELOCITY)),
+        STOP(new Vec2());
+
+        private final Vec2 direction;
+
+        /**
+         * Embed the direction into the move state.
+         *
+         * @param direction the direction vector.
+         */
+        MoveState(Vec2 direction) {
+            this.direction = direction;
+        }
+
+        /**
+         * Get the direction vector.
+         *
+         * @return the direction.
+         */
+        public Vec2 getDirectionVector() {
+            return direction;
+        }
     }
 
     /**

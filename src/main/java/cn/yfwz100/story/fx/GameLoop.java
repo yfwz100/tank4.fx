@@ -158,6 +158,9 @@ public class GameLoop extends AnimationTimer implements GameControl {
 
                 g.save();
                 {
+                    g.setLineWidth(0.1);
+                    g.scale(5, 5);
+
                     story.actorIterator().forEachRemaining(actor -> {
                         if (actor instanceof ActorGraphics) {
                             ((ActorGraphics) actor).paint(g);
@@ -206,17 +209,6 @@ public class GameLoop extends AnimationTimer implements GameControl {
     public void stop() {
         runningProperty.set(false);
         activeProperty.set(false);
-
-        //<editor-fold defaultState="collapsed" desc="canvas.clear();">
-        {
-            GraphicsContext g = canvas.getGraphicsContext2D();
-            g.save();
-
-            g.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-
-            g.restore();
-        }
-        //</editor-fold>
 
         super.stop();
     }

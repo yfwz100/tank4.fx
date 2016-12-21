@@ -30,7 +30,6 @@ public class StyledBlock extends Block implements ActorGraphics {
     @Override
     public void paint(GraphicsContext g) {
         g.save();
-        g.scale(0.5, 0.5);
 
         g.translate(getBody().getPosition().x, getBody().getPosition().y);
         g.rotate(Math.toDegrees(getBody().getAngle()));

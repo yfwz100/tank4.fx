@@ -3,7 +3,6 @@ package cn.yfwz100.tank4.fx.effect;
 import cn.yfwz100.story.Actor;
 import cn.yfwz100.story.Story;
 import cn.yfwz100.story.fx.ActorGraphics;
-import cn.yfwz100.tank4.Killable;
 
 /**
  * The basic interface for visual effect.

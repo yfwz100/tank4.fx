@@ -6,6 +6,7 @@ import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
+import org.jbox2d.dynamics.FixtureDef;
 
 /**
  * The actor of the bullet.
@@ -34,7 +35,7 @@ public abstract class Bullet implements Actor {
      *
      * @param story the story.
      * @param pos the position.
-     * @param vel the velocity.
+     * @param vel the VELOCITY.
      */
     protected Bullet(Tank4Story story, Vec2 pos, Vec2 vel) {
         this.story = story;
@@ -47,12 +48,15 @@ public abstract class Bullet implements Actor {
         body = story.getWorld().createBody(bodyDef);
 
         CircleShape circle = new CircleShape();
-        circle.m_radius = 5;
-        body.createFixture(circle, 20);
-        body.resetMassData();
+        circle.m_radius = 0.5f;
+        FixtureDef fixtureDef = new FixtureDef();
+        fixtureDef.density = 0.1f;
+        fixtureDef.friction = 0;
+        fixtureDef.shape = circle;
+        body.createFixture(fixtureDef);
 
-//        body.setLinearVelocity(vel.mulLocal(body.getMass()));
-        body.applyLinearImpulse(vel.mulLocal(body.getMass()), body.getWorldCenter());
+        body.setLinearVelocity(vel);
+//        body.applyLinearImpulse(vel.mul(body.getMass()), body.getWorldCenter());
     }
 
     @Override

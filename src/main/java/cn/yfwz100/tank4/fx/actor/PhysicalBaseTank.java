@@ -79,7 +79,7 @@ public abstract class PhysicalBaseTank implements BaseTank {
             tankBody = story.getWorld().createBody(tankBodyDef);
 
             PolygonShape rect = new PolygonShape();
-            rect.setAsBox(25f, 25f);
+            rect.setAsBox(getTankWidth() / 2, getTankHeight() / 2);
             FixtureDef bodyFixtureDef = new FixtureDef();
             bodyFixtureDef.shape = rect;
             bodyFixtureDef.density = 20;
@@ -102,11 +102,11 @@ public abstract class PhysicalBaseTank implements BaseTank {
             gunBody = story.getWorld().createBody(gunBodyDef);
 
             PolygonShape rect = new PolygonShape();
-            rect.setAsBox(10, 25, new Vec2(0, 15), 0);
+            rect.setAsBox(1, 2.5f, new Vec2(0, 1.5f), 0);
             FixtureDef gunFixtureDef = new FixtureDef();
             gunFixtureDef.shape = rect;
-            gunFixtureDef.density = 20;
-            gunFixtureDef.friction = 20;
+            gunFixtureDef.density = 2;
+            gunFixtureDef.friction = 2;
 //            gunFixtureDef.filter.categoryBits = 0x2;
             gunBody.createFixture(gunFixtureDef);
         }
@@ -194,6 +194,16 @@ public abstract class PhysicalBaseTank implements BaseTank {
     @Override
     public double getY() {
         return 0;
+    }
+
+    @Override
+    public float getTankWidth() {
+        return 5f;
+    }
+
+    @Override
+    public float getTankHeight() {
+        return 5f;
     }
 
     @Override
