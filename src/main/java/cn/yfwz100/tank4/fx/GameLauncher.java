@@ -105,6 +105,24 @@ public class GameLauncher extends Application {
      */
     private final ScoreModel scoreModel = new ScoreModel();
 
+    /**
+     * Game counter.
+     */
+    private AtomicInteger counter = new AtomicInteger();
+    {
+        ScheduledExecutorService service = Executors.newScheduledThreadPool(1);
+        service.scheduleAtFixedRate(() -> {
+            if (gameLoop != null && gameLoop.isRunning()) {
+                int remains = counter.getAndDecrement();
+                Platform.runLater(() -> gameCountDownLabel.setText(String.format("Remain Time: %ds", remains)));
+                if (remains <= 0) {
+                    Platform.runLater(() -> gameMessageLabel.setText("Time's UP!"));
+                    Platform.runLater(this::stopGame);
+                }
+            }
+        }, 0, 1, TimeUnit.SECONDS);
+    }
+
     private void stopGame() {
         gameLoop.stop();
 
@@ -142,21 +160,13 @@ public class GameLauncher extends Application {
     }
 
     private void startGame() {
+        gameMessageLabel.setText("");
+
         gameLoop.setStory(story = levelChoiceBox.getValue().getStory());
         gameLoop.start();
         mainPane.setCenter(gamePane);
 
-        ScheduledExecutorService service = Executors.newScheduledThreadPool(1);
-        AtomicInteger counter = new AtomicInteger(60);
-        service.scheduleAtFixedRate(() -> {
-            int remains = counter.getAndDecrement();
-            Platform.runLater(() -> gameCountDownLabel.setText(String.format("Remain Time: %ds", remains)));
-            if (remains <= 0) {
-                service.shutdown();
-                Platform.runLater(() -> gameMessageLabel.setText("Time's UP!"));
-                Platform.runLater(this::stopGame);
-            }
-        }, 0, 1, TimeUnit.SECONDS);
+        counter.set(60);
 
         FadeTransition fadeTransition = new FadeTransition(Duration.millis(1000), gamePane);
         fadeTransition.setFromValue(0);
@@ -467,10 +477,11 @@ public class GameLauncher extends Application {
 
         MenuBar menuBar = new MenuBar();
         menuBar.getMenus().addAll(gameMenu, sessionMenu, helpMenu);
-        menuBar.setUseSystemMenuBar(true);
 
         // set the mac stuff.
-        if (menuBar.isUseSystemMenuBar()) {
+        if (System.getProperty("os.name").startsWith("Mac")) {
+            menuBar.setUseSystemMenuBar(true);
+
             MenuToolkit tk = MenuToolkit.toolkit();
             Menu appMenu = tk.createDefaultApplicationMenu("Tank4");
             appMenu.getItems().get(0).setOnAction(aboutActionHandler);
