@@ -1,20 +1,18 @@
 package cn.yfwz100.tank4.fx;
 
-import cn.yfwz100.story.Story;
 import cn.yfwz100.story.fx.GameLoop;
 import cn.yfwz100.tank4.BaseTank;
 import cn.yfwz100.tank4.PlayerTank;
 import cn.yfwz100.tank4.Tank4Story;
 import cn.yfwz100.tank4.TankScoreBoard;
-import cn.yfwz100.tank4.fx.battle.BasicTankBattleStory;
 import cn.yfwz100.tank4.fx.battle.ScriptBasedTankBattle;
 import de.codecentric.centerdevice.MenuToolkit;
 import javafx.animation.FadeTransition;
 import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.property.*;
-import javafx.beans.value.ObservableValue;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
@@ -35,7 +33,6 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import javax.script.ScriptException;
-import java.io.File;
 
 /**
  * The window of the board game.
@@ -54,9 +51,9 @@ public class GameLauncher extends Application {
     }
 
     /**
-     * The game canvas.
+     * The game pane.
      */
-    private Canvas gameCanvas;
+    private StackPane gamePane;
 
     /**
      * The about pane.
@@ -107,9 +104,9 @@ public class GameLauncher extends Application {
         EventHandler<ActionEvent> startActionHandler = e -> Platform.runLater(() -> {
             gameLoop.setStory(story = levelChoiceBox.getValue().getStory());
             gameLoop.start();
-            mainPane.setCenter(gameCanvas);
+            mainPane.setCenter(gamePane);
 
-            FadeTransition fadeTransition = new FadeTransition(Duration.millis(1000), gameCanvas);
+            FadeTransition fadeTransition = new FadeTransition(Duration.millis(1000), gamePane);
             fadeTransition.setFromValue(0);
             fadeTransition.setToValue(1.0);
             fadeTransition.setCycleCount(1);
@@ -138,7 +135,7 @@ public class GameLauncher extends Application {
             }
             //</editor-fold>
 
-            FadeTransition fadeTransition = new FadeTransition(Duration.millis(1000), gameCanvas);
+            FadeTransition fadeTransition = new FadeTransition(Duration.millis(1000), gamePane);
             fadeTransition.setFromValue(1.0);
             fadeTransition.setToValue(0.0);
             fadeTransition.setCycleCount(1);
@@ -191,86 +188,91 @@ public class GameLauncher extends Application {
         //</editor-fold>
 
         //<editor-fold defaultState="collapsed" desc="Construct the gameCanvas and gameLoop.">
-        gameCanvas = new Canvas(600, 400);
+        gamePane = new StackPane();
         {
-            GraphicsContext g = gameCanvas.getGraphicsContext2D();
-            g.save();
-            g.setFill(Color.WHITE);
-            g.fillRect(0, 0, gameCanvas.getWidth(), gameCanvas.getHeight());
-            g.restore();
+            Canvas gameCanvas = new Canvas(600, 400);
+            {
+                GraphicsContext g = gameCanvas.getGraphicsContext2D();
+                g.save();
+                g.setFill(Color.WHITE);
+                g.fillRect(0, 0, gameCanvas.getWidth(), gameCanvas.getHeight());
+                g.restore();
+            }
+            gameLoop = new GameLoop(gameCanvas);
+            gameLoop.setOnExit(stopActionHandler);
+            mainScene.setOnKeyPressed(e -> {
+                if (gameLoop.isRunning() && gameLoop.getStory() instanceof Tank4Story) {
+                    PlayerTank hero = ((Tank4Story) gameLoop.getStory()).getPlayer();
+                    switch (e.getCode()) {
+                        case A:
+                        case LEFT:
+                            hero.setMoveState(BaseTank.MoveState.LEFT);
+                            break;
+                        case D:
+                        case RIGHT:
+                            hero.setMoveState(BaseTank.MoveState.RIGHT);
+                            break;
+                        case W:
+                        case UP:
+                            hero.setMoveState(BaseTank.MoveState.UP);
+                            break;
+                        case S:
+                        case DOWN:
+                            hero.setMoveState(BaseTank.MoveState.DOWN);
+                            break;
+                        case K:
+                            hero.setGunState(BaseTank.GunState.CLOCKWISE);
+                            break;
+                        case J:
+                            hero.setGunState(BaseTank.GunState.ANTICLOCKWISE);
+                            break;
+                    }
+                }
+            });
+            mainScene.setOnKeyReleased(e -> {
+                if (gameLoop.isRunning() && gameLoop.getStory() instanceof Tank4Story) {
+                    PlayerTank hero = ((Tank4Story) gameLoop.getStory()).getPlayer();
+                    switch (e.getCode()) {
+                        case A:
+                        case LEFT:
+                            if (hero.getMoveState() == BaseTank.MoveState.LEFT) {
+                                hero.setMoveState(BaseTank.MoveState.STOP);
+                            }
+                            break;
+                        case D:
+                        case RIGHT:
+                            if (hero.getMoveState() == BaseTank.MoveState.RIGHT) {
+                                hero.setMoveState(BaseTank.MoveState.STOP);
+                            }
+                            break;
+                        case W:
+                        case UP:
+                            if (hero.getMoveState() == BaseTank.MoveState.UP) {
+                                hero.setMoveState(BaseTank.MoveState.STOP);
+                            }
+                            break;
+                        case S:
+                        case DOWN:
+                            if (hero.getMoveState() == BaseTank.MoveState.DOWN) {
+                                hero.setMoveState(BaseTank.MoveState.STOP);
+                            }
+                            break;
+                        case J:
+                        case K:
+                            hero.setGunState(BaseTank.GunState.STOP);
+                            break;
+                        case SPACE:
+                            hero.setShooting(true);
+                            break;
+                        default:
+                            hero.setMoveState(BaseTank.MoveState.STOP);
+                    }
+                }
+            });
+            gameCanvas.setCache(true);
+
+            gamePane.getChildren().addAll(gameCanvas);
         }
-        gameLoop = new GameLoop(gameCanvas);
-        gameLoop.setOnExit(stopActionHandler);
-        mainScene.setOnKeyPressed(e -> {
-            if (gameLoop.isRunning() && gameLoop.getStory() instanceof Tank4Story) {
-                PlayerTank hero = ((Tank4Story) gameLoop.getStory()).getPlayer();
-                switch (e.getCode()) {
-                    case A:
-                    case LEFT:
-                        hero.setMoveState(BaseTank.MoveState.LEFT);
-                        break;
-                    case D:
-                    case RIGHT:
-                        hero.setMoveState(BaseTank.MoveState.RIGHT);
-                        break;
-                    case W:
-                    case UP:
-                        hero.setMoveState(BaseTank.MoveState.UP);
-                        break;
-                    case S:
-                    case DOWN:
-                        hero.setMoveState(BaseTank.MoveState.DOWN);
-                        break;
-                    case K:
-                        hero.setGunState(BaseTank.GunState.CLOCKWISE);
-                        break;
-                    case J:
-                        hero.setGunState(BaseTank.GunState.ANTICLOCKWISE);
-                        break;
-                }
-            }
-        });
-        mainScene.setOnKeyReleased(e -> {
-            if (gameLoop.isRunning() && gameLoop.getStory() instanceof Tank4Story) {
-                PlayerTank hero = ((Tank4Story) gameLoop.getStory()).getPlayer();
-                switch (e.getCode()) {
-                    case A:
-                    case LEFT:
-                        if (hero.getMoveState() == BaseTank.MoveState.LEFT) {
-                            hero.setMoveState(BaseTank.MoveState.STOP);
-                        }
-                        break;
-                    case D:
-                    case RIGHT:
-                        if (hero.getMoveState() == BaseTank.MoveState.RIGHT) {
-                            hero.setMoveState(BaseTank.MoveState.STOP);
-                        }
-                        break;
-                    case W:
-                    case UP:
-                        if (hero.getMoveState() == BaseTank.MoveState.UP) {
-                            hero.setMoveState(BaseTank.MoveState.STOP);
-                        }
-                        break;
-                    case S:
-                    case DOWN:
-                        if (hero.getMoveState() == BaseTank.MoveState.DOWN) {
-                            hero.setMoveState(BaseTank.MoveState.STOP);
-                        }
-                        break;
-                    case J:
-                    case K:
-                        hero.setGunState(BaseTank.GunState.STOP);
-                        break;
-                    case SPACE:
-                        hero.setShooting(true);
-                        break;
-                    default:
-                        hero.setMoveState(BaseTank.MoveState.STOP);
-                }
-            }
-        });
-        gameCanvas.setCache(true);
         //</editor-fold>
 
         //<editor-fold defaultState="collapsed" desc="Construct the scorePane.">
@@ -381,7 +383,7 @@ public class GameLauncher extends Application {
             resumeMenuItem.disableProperty().bind(gameLoop.activeProperty().not().or(gameLoop.runningProperty()));
             resumeMenuItem.setAccelerator(KeyCombination.valueOf("meta+r"));
             resumeMenuItem.setOnAction(e -> Platform.runLater(() -> {
-                mainPane.setCenter(gameCanvas);
+                mainPane.setCenter(gamePane);
                 gameLoop.resume();
             }));
             sessionMenu.getItems().add(resumeMenuItem);
@@ -390,7 +392,7 @@ public class GameLauncher extends Application {
             pauseMenuItem.disableProperty().bind(gameLoop.activeProperty().not().or(gameLoop.runningProperty().not()));
             pauseMenuItem.setAccelerator(KeyCombination.valueOf("meta+p"));
             pauseMenuItem.setOnAction(e -> Platform.runLater(() -> {
-                mainPane.setCenter(gameCanvas);
+                mainPane.setCenter(gamePane);
                 gameLoop.pause();
             }));
             sessionMenu.getItems().add(pauseMenuItem);
@@ -459,10 +461,6 @@ public class GameLauncher extends Application {
 
         private String name;
         private String fileName;
-
-        LevelInfo(String name) {
-            this(name, name);
-        }
 
         LevelInfo(String name, String fileName) {
             this.name = name;
