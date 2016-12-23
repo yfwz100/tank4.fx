@@ -34,7 +34,7 @@ public class StyledBlock extends Block implements ActorGraphics {
         g.translate(getBody().getPosition().x, getBody().getPosition().y);
         g.rotate(Math.toDegrees(getBody().getAngle()));
         g.setFill(Color.RED);
-        g.fillRect(-getWidth() / 2, -getHeight() /2, getWidth(), getHeight());
+        g.fillRect(-getWidth() / 2, -getHeight() / 2, getWidth(), getHeight());
 
         g.restore();
     }

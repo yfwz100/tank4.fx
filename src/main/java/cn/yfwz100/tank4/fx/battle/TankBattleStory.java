@@ -2,7 +2,6 @@ package cn.yfwz100.tank4.fx.battle;
 
 import cn.yfwz100.story.ActorIterator;
 import cn.yfwz100.story.Story;
-import cn.yfwz100.story.ScoreBoard;
 import cn.yfwz100.tank4.*;
 import cn.yfwz100.tank4.fx.actor.StyledPlayerTank;
 import cn.yfwz100.tank4.fx.effect.SimpleExplodeEffect;
@@ -17,7 +16,6 @@ import org.jbox2d.dynamics.World;
 import org.jbox2d.dynamics.contacts.Contact;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 /**
@@ -122,7 +120,7 @@ public abstract class TankBattleStory implements Tank4Story {
         });
 
         // place on (0, 0) of the world.
-        player = new StyledPlayerTank(this, 0, 0);
+        player = new StyledPlayerTank(this, 10, 10);
 
         bullets = new ConcurrentLinkedDeque<>();
 
@@ -136,9 +134,7 @@ public abstract class TankBattleStory implements Tank4Story {
     }
 
     @Override
-    public Story update() {
-        Tank4Story.super.update();
-
+    public Story getNextStory() {
         return nextStory;
     }
 

@@ -33,7 +33,7 @@ public interface Story {
         }
         //</editor-fold>
 
-        return this;
+        return getNextStory();
     }
 
     /**
@@ -56,4 +56,13 @@ public interface Story {
      * @return the score board.
      */
     ScoreBoard getScoreBoard();
+
+    /**
+     * Get the next story.
+     *
+     * @return the next story.
+     */
+    default Story getNextStory() {
+        return this;
+    }
 }
