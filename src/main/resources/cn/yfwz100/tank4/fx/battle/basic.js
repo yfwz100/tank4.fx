@@ -6,6 +6,11 @@
 var StyledSimpleAITank = Packages.cn.yfwz100.tank4.fx.actor.StyledSimpleAITank;
 var StyledBlock = Packages.cn.yfwz100.tank4.fx.actor.StyledBlock;
 
+battle.getBlocks().add(new StyledBlock(battle,  60,  -1, 120,  1, 0));
+battle.getBlocks().add(new StyledBlock(battle, 121,  40,   1, 80, 0));
+battle.getBlocks().add(new StyledBlock(battle,  60,  81, 120,  1, 0));
+battle.getBlocks().add(new StyledBlock(battle,   -1,  40,   1, 80, 0));
+
 // initialize the tanks.
 battle.getTanks().add(new StyledSimpleAITank(battle,  10, 30));
 battle.getTanks().add(new StyledSimpleAITank(battle,  20, 45));
