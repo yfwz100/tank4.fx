@@ -61,6 +61,11 @@ public class GameLauncher extends Application {
     private BorderPane mainPane;
 
     /**
+     * The welcome pane.
+     */
+    private FlowPane welcomePane;
+
+    /**
      * The game pane.
      */
     private StackPane gamePane;
@@ -86,6 +91,11 @@ public class GameLauncher extends Application {
     private FlowPane aboutPane;
 
     /**
+     * The `how to` pane.
+     */
+    private FlowPane howToPane;
+
+    /**
      * The score pane.
      */
     private FlowPane scorePane;
@@ -109,19 +119,6 @@ public class GameLauncher extends Application {
      * Game counter.
      */
     private AtomicInteger counter = new AtomicInteger();
-    {
-        ScheduledExecutorService service = Executors.newScheduledThreadPool(1);
-        service.scheduleAtFixedRate(() -> {
-            if (gameLoop != null && gameLoop.isRunning()) {
-                int remains = counter.getAndDecrement();
-                Platform.runLater(() -> gameCountDownLabel.setText(String.format("Remain Time: %ds", remains)));
-                if (remains <= 0) {
-                    Platform.runLater(() -> gameMessageLabel.setText("Time's UP!"));
-                    Platform.runLater(this::stopGame);
-                }
-            }
-        }, 0, 1, TimeUnit.SECONDS);
-    }
 
     private void stopGame() {
         gameLoop.stop();
@@ -142,6 +139,31 @@ public class GameLauncher extends Application {
         fadeTransition.setCycleCount(1);
         fadeTransition.setAutoReverse(false);
         fadeTransition.setOnFinished(e2 -> mainPane.setCenter(scorePane));
+        fadeTransition.play();
+    }
+
+    private void showWelcome() {
+        mainPane.setCenter(welcomePane);
+        {
+            FadeTransition fadeTransition = new FadeTransition(Duration.seconds(1), welcomePane);
+            fadeTransition.setFromValue(0);
+            fadeTransition.setToValue(1.0);
+            fadeTransition.play();
+        }
+    }
+
+    private void showHowTo() {
+        if (gameLoop.isActive()) {
+            gameLoop.pause();
+        }
+
+        mainPane.setCenter(howToPane);
+
+        FadeTransition fadeTransition = new FadeTransition(Duration.millis(1000), aboutPane);
+        fadeTransition.setFromValue(0);
+        fadeTransition.setToValue(1.0);
+        fadeTransition.setCycleCount(1);
+        fadeTransition.setAutoReverse(false);
         fadeTransition.play();
     }
 
@@ -181,6 +203,23 @@ public class GameLauncher extends Application {
     public void start(Stage theStage) {
         theStage.setTitle("Block Tank Game");
 
+        //<editor-fold defaultState="collapsed" desc="Set the background service.">
+        {
+            ScheduledExecutorService service = Executors.newScheduledThreadPool(1);
+            service.scheduleAtFixedRate(() -> {
+                if (gameLoop != null && gameLoop.isRunning()) {
+                    int remains = counter.getAndDecrement();
+                    Platform.runLater(() -> gameCountDownLabel.setText(String.format("Remain Time: %ds", remains)));
+                    if (remains <= 0) {
+                        Platform.runLater(() -> gameMessageLabel.setText("Time's UP!"));
+                        Platform.runLater(this::stopGame);
+                    }
+                }
+            }, 0, 1, TimeUnit.SECONDS);
+            theStage.setOnCloseRequest(e -> service.shutdown());
+        }
+        //</editor-fold>
+
         mainPane = new BorderPane();
         {
             FadeTransition fadeTransition = new FadeTransition(Duration.seconds(5), mainPane);
@@ -199,7 +238,7 @@ public class GameLauncher extends Application {
         //</editor-fold>
 
         //<editor-fold defaultState="collapsed" desc="Construct the welcomePane.">
-        FlowPane welcomePane = new FlowPane();
+        welcomePane = new FlowPane();
         {
             welcomePane.setAlignment(Pos.CENTER);
             welcomePane.setColumnHalignment(HPos.CENTER);
@@ -383,12 +422,36 @@ public class GameLauncher extends Application {
             Button shareBtn = new Button("↗ Share");
             shareBtn.setDefaultButton(true);
             Button restartBtn = new Button("↺ Restart");
-            restartBtn.setOnAction(startActionHandler);
+            restartBtn.setOnAction(e -> Platform.runLater(this::showWelcome));
             buttonBar.setAlignment(Pos.CENTER);
             buttonBar.setSpacing(10);
             buttonBar.getChildren().addAll(shareBtn, restartBtn);
 
             scorePane.getChildren().addAll(logoView, detailBox, buttonBar);
+        }
+        //</editor-fold>
+
+        //<editor-fold defaultState="collapsed" desc="Construct the `how to` Pane">
+        howToPane = new FlowPane();
+        {
+            ImageView bannerImage = new ImageView("cn/yfwz100/tank4/fx/TankIIBanner.png");
+
+            Label label = new Label("\n`a/s/d/w` to move the main body of the tank.\n" +
+                    "`j/k` to move the barrel of the tank.\n" +
+                    "`SPACE` to shoot.\n" +
+                    "\n");
+
+            Button backButton = new Button("← Back");
+            {
+                backButton.setOnAction(e -> Platform.runLater(this::showWelcome));
+                backButton.setPrefWidth(bannerImage.getImage().getWidth() * 0.5);
+            }
+
+            howToPane.getChildren().addAll(bannerImage, label, backButton);
+            howToPane.setOrientation(Orientation.VERTICAL);
+            howToPane.setVgap(20);
+            howToPane.setAlignment(Pos.CENTER);
+            howToPane.setColumnHalignment(HPos.CENTER);
         }
         //</editor-fold>
 
@@ -412,15 +475,7 @@ public class GameLauncher extends Application {
 
             Button backButton = new Button("← Back");
             {
-                backButton.setOnAction(e -> Platform.runLater(() -> {
-                    mainPane.setCenter(welcomePane);
-                    {
-                        FadeTransition fadeTransition = new FadeTransition(Duration.seconds(1), welcomePane);
-                        fadeTransition.setFromValue(0);
-                        fadeTransition.setToValue(1.0);
-                        fadeTransition.play();
-                    }
-                }));
+                backButton.setOnAction(e -> Platform.runLater(this::showWelcome));
                 backButton.setPrefWidth(bannerImage.getImage().getWidth() * 0.5);
             }
 
@@ -474,6 +529,7 @@ public class GameLauncher extends Application {
         final Menu helpMenu = new Menu("Help");
         {
             MenuItem howToMenuItem = new MenuItem("How to play?");
+            howToMenuItem.setOnAction(e -> Platform.runLater(this::showHowTo));
             helpMenu.getItems().add(howToMenuItem);
         }
 
