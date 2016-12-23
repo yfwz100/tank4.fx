@@ -172,18 +172,22 @@ public class GameLoop extends AnimationTimer implements GameControl {
         }
     }
 
+    @Override
     public BooleanProperty activeProperty() {
         return activeProperty;
     }
 
+    @Override
     public boolean isActive() {
         return activeProperty.get();
     }
 
+    @Override
     public BooleanProperty runningProperty() {
         return runningProperty;
     }
 
+    @Override
     public boolean isRunning() {
         return runningProperty.get();
     }
@@ -192,20 +196,24 @@ public class GameLoop extends AnimationTimer implements GameControl {
         return keyMapProperty;
     }
 
+    @Override
     public void start() {
         runningProperty.set(true);
         activeProperty.set(true);
         super.start();
     }
 
+    @Override
     public void resume() {
         runningProperty.set(true);
     }
 
+    @Override
     public void pause() {
         runningProperty.set(false);
     }
 
+    @Override
     public void stop() {
         runningProperty.set(false);
         activeProperty.set(false);
