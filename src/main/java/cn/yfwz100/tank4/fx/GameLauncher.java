@@ -132,6 +132,7 @@ public class GameLauncher extends Application {
             scoreModel.score.set(String.valueOf(scoreBoard.getScore()));
             scoreModel.maxKillTimes.set(String.valueOf(scoreBoard.getMaxKillTimes()));
             scoreModel.description.set(scoreBoard.getDescription());
+            scoreModel.cleared.set(story.getTanks().isEmpty() ? "Yes" : "No");
         }
         //</editor-fold>
 
@@ -358,9 +359,10 @@ public class GameLauncher extends Application {
 
             GridPane detailBox = new GridPane();
             {
-                detailBox.addRow(0, new Label("Achievement: "), styledLabel(scoreModel.description));
-                detailBox.addRow(1, new Label("Score: "), styledLabel(scoreModel.score));
-                detailBox.addRow(2, new Label("Killed: "), styledLabel(scoreModel.maxKillTimes));
+                detailBox.addRow(0, new Label("Cleared: "), styledLabel(scoreModel.cleared));
+                detailBox.addRow(1, new Label("Achievement: "), styledLabel(scoreModel.description));
+                detailBox.addRow(2, new Label("Score: "), styledLabel(scoreModel.score));
+                detailBox.addRow(3, new Label("Killed: "), styledLabel(scoreModel.maxKillTimes));
 
                 ColumnConstraints headerConstraints = new ColumnConstraints();
                 headerConstraints.setHalignment(HPos.RIGHT);
@@ -524,6 +526,11 @@ public class GameLauncher extends Application {
          * The description.
          */
         private final StringProperty description = new SimpleStringProperty();
+
+        /**
+         * Cleared?
+         */
+        private final StringProperty cleared = new SimpleStringProperty();
     }
 
     /**

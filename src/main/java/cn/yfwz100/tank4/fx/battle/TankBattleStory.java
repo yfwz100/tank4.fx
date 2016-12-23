@@ -134,6 +134,15 @@ public abstract class TankBattleStory implements Tank4Story {
     }
 
     @Override
+    public Story update() {
+        if (!getTanks().isEmpty()) {
+            return Tank4Story.super.update();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
     public Story getNextStory() {
         return nextStory;
     }

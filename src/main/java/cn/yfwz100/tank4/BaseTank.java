@@ -157,6 +157,12 @@ public interface BaseTank extends Actor, Killable {
      */
     Bullet createBullet(Vec2 pos, Vec2 vel);
 
+    @Override
+    default void cleanup() {
+        getStory().getWorld().destroyBody(getTankBody());
+        getStory().getWorld().destroyBody(getGunBody());
+    }
+
     /**
      * The state of the tank.
      */
