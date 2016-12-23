@@ -4,10 +4,10 @@ This is a tank game written in JavaFX. The goal of the game is to experiment wit
 
 At present, the game implements:
 
-1. the interface-based game framework.
-2. the basic game control of the player's tank (movement of the tank body and movement of the barrel).
-3. the simple AI which will aim at player when possible.
-4. the script-based(implemented in Nashorn JavaScript) level builder.
+- the interface-based game framework.
+- the basic game control of the player's tank (movement of the tank body and movement of the barrel).
+- the simple AI which will aim at player when possible.
+- the script-based(implemented in Nashorn JavaScript) level builder.
 
 The future plan of the game includes a more intelligent and evolvable AI and interesting levels.
 
