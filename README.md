@@ -1,17 +1,17 @@
 # Tank4.fx
 
-This is a tank game written in JavaFX. The goal of the game is to experiment with the architecture skill and the new Java 8 features.
+This is a tank game written in JavaFX. The game aims to experiment with the architecture skill and the new Java 8 features.
 
-At present, the game implements:
+So far, the following features have been implemented:
 
 - the interface-based game framework.
 - the basic game control of the player's tank (movement of the tank body and movement of the barrel).
-- the simple AI which will aim at player when possible.
-- the script-based(implemented in Nashorn JavaScript) level builder.
+- the simple AI which will make tank target at player when possible.
+- the script-based (implemented in Nashorn JavaScript) level builder.
 
-The future plan of the game includes a more intelligent and evolvable AI and interesting levels.
+The future plan of the game includes a more intelligent and evolvable AI as well as some interesting levels.
 
-Feel free to send PULL REQEUST and any suggestions.
+Feel free to send me PULL REQEUST or any suggestions.
 
 # Game control
 
